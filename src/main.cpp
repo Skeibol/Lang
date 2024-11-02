@@ -1,4 +1,5 @@
 #include "./tokenization.hpp"
+#include "parser.hpp"
 #include <fstream>
 #include <iostream>
 #include <optional>
@@ -13,11 +14,11 @@ std::string tokensToAssembly(const std::vector<Token> tokens)
   {
     int a;
     const Token token = tokens.at(i);
-    if (token.type == TokenType::_return)
+    if (token.type == TokenType::_exit)
     {
-      if (i + 1 < tokens.size() && tokens.at(i + 1).type == TokenType::int_lit)
+      if (i + 1 < tokens.size() && tokens.at(i + 1).type == TokenType::_int_lit)
       {
-        if (i + 2 < tokens.size() && tokens.at(i + 2).type == TokenType::semi)
+        if (i + 2 < tokens.size() && tokens.at(i + 2).type == TokenType::_semi)
         {
           output << "    mov rax, 60\n";
           output << "    mov rdi, " << tokens.at(i + 1).value.value() << "\n";
@@ -55,6 +56,7 @@ int main(int argc, char const *argv[])
     file << tokensToAssembly(tokenz);
     std::cout << tokensToAssembly(tokenz);
   }
+ 
   system("nasm -felf64 ./out.asm");
   system("ld -o ./out ./out.o");
   return EXIT_SUCCESS;

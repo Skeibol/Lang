@@ -7,9 +7,9 @@
 
 enum class TokenType
 {
-  _return,
-  int_lit,
-  semi
+  _exit,
+  _int_lit,
+  _semi
 };
 
 struct Token
@@ -42,7 +42,7 @@ public:
         } while (peek().has_value() && std::isalnum(peek().value()));
         if (buffer == "return")
         {
-          tokens.push_back({TokenType::_return});
+          tokens.push_back({TokenType::_exit});
           buffer.clear();
           continue;
         }
@@ -59,18 +59,17 @@ public:
         {
           buffer.push_back(consume());
         } while (peek().has_value() && std::isdigit(peek().value()));
-        tokens.push_back({TokenType::int_lit, buffer});
+        tokens.push_back({TokenType::_int_lit, buffer});
         buffer.clear();
       }
       else if (peek().value() == 59) /* 59 = semicolon */
       {
         consume();
-        tokens.push_back({TokenType::semi});
+        tokens.push_back({TokenType::_semi});
         continue;
       }
       else if (std::isspace(peek().value()))
       {
-        std::cout << "??" << std::endl;
         consume();
         continue;
       }
@@ -86,7 +85,7 @@ public:
   }
 
 private:
-  [[nodiscard]] std::optional<char> peek(int amount = 1) const
+  [[nodiscard]] std::optional<char> peek(int amount = 0) const
   {
     if (m_currentIndex + amount >= m_source.length())
     {
@@ -104,5 +103,5 @@ private:
     return m_source.at(m_currentIndex - 1);
   }
   const std::string m_source;
-  int m_currentIndex = 0;
+  size_t m_currentIndex = 0;
 };
