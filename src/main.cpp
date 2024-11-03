@@ -1,4 +1,4 @@
-#include "./tokenization.hpp"
+#include "./tokenizer.hpp"
 #include "parser.hpp"
 #include <fstream>
 #include <iostream>
@@ -30,6 +30,23 @@ std::string tokensToAssembly(const std::vector<Token> tokens)
 
   return output.str();
 }
+std::string readFileContents(std::string codePath)
+{
+  std::string code;
+  std::stringstream content_stream;
+
+  std::fstream input(codePath, std::ios::in);
+  content_stream << input.rdbuf();
+  code = content_stream.str();
+
+  return code;
+}
+void writeToFile(std::string fileContents)
+{
+  std::fstream file("./build/out.asm", std::ios::out);
+  file << fileContents;
+  std::cout << fileContents;
+}
 
 int main(int argc, char const *argv[])
 {
@@ -39,25 +56,16 @@ int main(int argc, char const *argv[])
     std::cerr << "cro <input.cro>" << std::endl;
     return EXIT_FAILURE;
   }
-  std::string fileContents;
 
-  {
-    std::stringstream content_stream;
-    std::fstream input(argv[1], std::ios::in);
-    content_stream << input.rdbuf();
-    fileContents = content_stream.str();
-  }
+  std::string fileContents = readFileContents(argv[1]);
 
   Tokenizer tokenizer(std::move(fileContents));
-  std::vector<Token> tokenz = tokenizer.tokenize();
+  std::vector<Token> tokens = tokenizer.tokenize();
 
-  {
-    std::fstream file("./out.asm", std::ios::out);
-    file << tokensToAssembly(tokenz);
-    std::cout << tokensToAssembly(tokenz);
-  }
- 
-  system("nasm -felf64 ./out.asm");
-  system("ld -o ./out ./out.o");
+  std::string assemblyCode = tokensToAssembly(tokens);
+  writeToFile(assemblyCode);
+
+  system("nasm -felf64 ./build/out.asm");
+  system("ld -o ./build/out ./build/out.o");
   return EXIT_SUCCESS;
 }

@@ -1,18 +1,18 @@
 
 
-all: ./build/crust ./build/crust.o run
+all: ./crust ./crust.o run
 
-run: ./build/crust
+run: ./crust
 	@echo
-	./build/crust code.cro # -------- Program starts here -------- 
+	./crust code.cro # -------- Program starts here -------- 
 	
-./build/crust: ./src/main.cpp ./src/tokenization.hpp ./src/parser.hpp 
-	g++ -fdiagnostics-color=always -g ./src/main.cpp -o ./build/crust
+./crust: ./src/main.cpp ./src/tokenization.hpp ./src/parser.hpp 
+	g++ -fdiagnostics-color=always -g ./src/*.cpp -o ./crust
 
-./build/crust.o: ./src/main.cpp ./src/tokenization.hpp ./src/parser.hpp 
-	g++ ./src/main.cpp -o ./build/crust.o
+./crust.o: ./src/main.cpp ./src/tokenization.hpp ./src/parser.hpp 
+	g++ ./src/*.cpp -o ./crust.o
 
 
 
 clean:
-	rm -f ./build/crust ./build/crust.o # Removed files ./build/crust.o , ./build/crust
+	rm -f ./crust ./crust.o # Removed files ./crust.o , ./crust

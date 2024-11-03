@@ -8,9 +8,9 @@
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceRoot}/build/crust",
+            "program": "${workspaceRoot}/crust",
             "args": [
-                "../code.cro"
+                "./code.cro"
             ],
             "cwd": ".",
             "setupCommands": [
