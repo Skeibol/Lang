@@ -4,17 +4,42 @@
 #include <iostream>
 #include <optional>
 #include <string>
+#include <variant>
 #include <vector>
 
 namespace node
 {
-struct Expression
+struct ExpressionIntLit
 {
   Token int_lit;
 };
-struct Exit
+struct ExpressionIdentifier
+{
+  Token identifier;
+};
+struct StatementExit
 {
   Expression expression;
+};
+struct StatementLet
+{
+  Token identifier;
+  Expression expression;
+};
+
+struct Expression
+{
+  std::variant<ExpressionIntLit, ExpressionIdentifier> type;
+};
+
+struct Statement
+{
+  std::variant<StatementExit, StatementLet> type;
+};
+
+struct Program
+{
+  std::vector<Statement> statements;
 };
 } // namespace node
 
@@ -27,49 +52,105 @@ public:
 
   std::optional<node::Expression> parseExpression()
   {
-    if (peek().has_value() && peek().value().type == TokenType::_int_lit)
+    if (checkTokenType(TokenType::_int_lit))
     {
-      return node::Expression{consume()};
+      return node::Expression{
+          .type = node::ExpressionIntLit{
+              .int_lit = consume()}};
     }
+    else if (checkTokenType(TokenType::_identifier))
+    {
+      return node::Expression{
+          .type = node::ExpressionIdentifier{
+              .identifier = consume()}};
+    }
+
     else
     {
       return {};
     }
   }
 
-  std::optional<node::Exit> parse()
+  std::optional<node::Statement> parseStatement()
   {
-
-    std::optional<node::Exit> exitNode;
-
-    while (peek().has_value())
+    node::StatementExit statementExit;
+    if (checkTokenType(TokenType::_exit) && checkTokenType(TokenType::_paren_open, 1))
     {
-      if (peek().value().type == TokenType::_exit)
+      consumeMultiple(2);
+      if (auto nodeExpression = parseExpression())
+      {
+        statementExit = {.expression = nodeExpression.value()};
+      }
+      else
+      {
+        std::cerr << "Invalid expression" << std::endl;
+        exit(EXIT_FAILURE);
+      }
+
+      if (checkTokenType(TokenType::_paren_close))
       {
         consume();
-        if (auto nodeExpression = parseExpression()) // Auto je skracenica za VAR.Kinda. Ako parseExpression(optional) vraca nešto, evaluate TRUE. Ako ne FALSE. Istovremeno assigna nodeExpression (implicit type conversion)
-        {
-          exitNode = node::Exit{nodeExpression.value()};
-        }
-        else
-        {
-          std::cerr << "Invalid expression" << std::endl;
-          exit(EXIT_FAILURE);
-        }
-
-        if (peek().has_value() && peek().value().type == TokenType::_semi)
-        {
-          consume();
-        }
-        else
-        {
-          std::cerr << "Invalid expression" << std::endl;
-          exit(EXIT_FAILURE);
-        }
       }
+      else
+      {
+        std::cerr << "Expected ')'" << std::endl;
+        exit(EXIT_FAILURE);
+      }
+
+      if (checkTokenType(TokenType::_semi))
+      {
+        consume();
+      }
+      else
+      {
+        std::cerr << "Expected ';'" << std::endl;
+        exit(EXIT_FAILURE);
+      }
+      m_currentIndex = 0;
+      return node::Statement{.type = statementExit};
     }
-    m_currentIndex = 0;
-    return exitNode;
+    else if (checkTokenType(TokenType::_let), checkTokenType(TokenType::_identifier, 1), checkTokenType(TokenType::_equals, 2))
+    {
+      consume(); // Consume 'let'
+      node::StatementLet statementLet = node::StatementLet{
+          .identifier = consume() // Consume variable name
+      };
+      consume(); // Consume '='
+      if (auto expr = parseExpression())
+      {
+        statementLet.expression = parseExpression().value();
+      }
+      else
+      {
+        std::cerr << 'invalid expression' << std::endl;
+        exit(EXIT_FAILURE);
+      }
+
+      if (checkTokenType(TokenType::_semi))
+      {
+        consume();
+      }
+      else
+      {
+        std::cerr << 'expected token ;' << std::endl;
+        exit(EXIT_FAILURE);
+      }
+
+      return node::Statement{.type = statementLet};
+    }
+  }
+
+  std::optional<node::Program> parseProgram()
+  {
+    node::Program program;
+    while (peek().has_value())
+    {
+      if (auto stmt = parseStatement())
+      {
+        program.statements.push_back(stmt.value());
+      }
+      
+    }
   }
 
 private:
@@ -84,7 +165,7 @@ private:
     }
     else
     {
-      return m_tokens.at(m_currentIndex);
+      return m_tokens.at(m_currentIndex + amount);
     }
   }
 
@@ -92,5 +173,21 @@ private:
   {
     m_currentIndex++;
     return m_tokens.at(m_currentIndex - 1);
+  }
+  std::vector<Token> consumeMultiple(int const amount)
+  {
+    std::vector<Token> consumedTokens;
+
+    for (size_t i = 1; i < amount; i++)
+    {
+      consumedTokens.push_back(consume());
+    }
+
+    return consumedTokens;
+  }
+
+  bool checkTokenType(TokenType typeToCheck, int amount = 0)
+  {
+    peek(amount).has_value() && peek(amount).value().type == typeToCheck;
   }
 };

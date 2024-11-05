@@ -10,13 +10,18 @@ enum class TokenType
 {
     _exit,
     _int_lit,
-    _semi
+    _semi,
+    _paren_open,
+    _paren_close,
+    _identifier,
+    _let,
+    _equals,
 };
 
 struct Token
 {
     TokenType type;
-    std::optional<std::string> value{};
+    std::optional<std::string> value;
 };
 
 class Tokenizer

@@ -9,7 +9,7 @@ std::string readFileContents(std::string codePath)
 {
   std::string code;
   std::stringstream content_stream;
-
+  std::variant<
   std::fstream input(codePath, std::ios::in);
   content_stream << input.rdbuf();
   code = content_stream.str();

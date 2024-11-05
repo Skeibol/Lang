@@ -65,6 +65,8 @@
         "numeric": "cpp",
         "random": "cpp",
         "string_view": "cpp",
-        "numbers": "cpp"
-    }
+        "numbers": "cpp",
+        "variant": "cpp"
+    },
+    "C_Cpp.default.compilerPath": "/usr/bin/clang"
 }

@@ -8,7 +8,7 @@ Tokenizer::Tokenizer(std::string src)
 
 std::vector<Token> Tokenizer::tokenize()
 {
-  std::string buffer = "";
+  std::string buffer;
   std::vector<Token> tokens = {};
 
   while (peek().has_value())
@@ -26,11 +26,14 @@ std::vector<Token> Tokenizer::tokenize()
         buffer.clear();
         continue;
       }
+      else if(buffer == "let") {
+        tokens.push_back({TokenType::_let});
+        buffer.clear();
+        continue;
+      }
       else
       {
-        std::cout << peek().value() << std::endl;
-        std::cerr << "Unrecognized token " << std::endl;
-        exit(EXIT_FAILURE);
+        tokens.push_back({TokenType::_identifier, buffer});
       }
     }
     else if (std::isdigit(peek().value()))
@@ -43,10 +46,28 @@ std::vector<Token> Tokenizer::tokenize()
       tokens.push_back({TokenType::_int_lit, buffer});
       buffer.clear();
     }
-    else if (peek().value() == 59) // 59 = semicolon
+    else if (peek().value() == '(')
+    {
+      consume();
+      tokens.push_back({TokenType::_paren_open});
+      continue;
+    }
+    else if (peek().value() == ')')
+    {
+      consume();
+      tokens.push_back({TokenType::_paren_close});
+      continue;
+    }
+    else if (peek().value() == ';')
     {
       consume();
       tokens.push_back({TokenType::_semi});
+      continue;
+    }
+    else if (peek().value() == ';')
+    {
+      consume();
+      tokens.push_back({TokenType::_equals});
       continue;
     }
     else if (std::isspace(peek().value()))
