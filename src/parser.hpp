@@ -39,7 +39,7 @@ public:
 
   std::optional<node::Exit> parse()
   {
-    
+
     std::optional<node::Exit> exitNode;
 
     while (peek().has_value())
@@ -53,13 +53,17 @@ public:
         }
         else
         {
-          std::cerr << "Invalid expression";
+          std::cerr << "Invalid expression" << std::endl;
           exit(EXIT_FAILURE);
         }
 
-        if (peek().has_value() || peek().value().type != TokenType::_semi)
+        if (peek().has_value() && peek().value().type == TokenType::_semi)
         {
-          std::cerr << "Invalid expression";
+          consume();
+        }
+        else
+        {
+          std::cerr << "Invalid expression" << std::endl;
           exit(EXIT_FAILURE);
         }
       }
