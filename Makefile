@@ -1,10 +1,12 @@
 
 
-all: ./crust ./crust.o run
+all: ./crust ./crust.o
+
+build: ./crust ./crust.o
 
 run: ./crust
 	@echo
-	./crust code.cro # -------- Program starts here -------- 
+	./crust code.cro # -------- Program starts here --------
 	
 ./crust: ./src/main.cpp ./src/tokenizer.hpp ./src/parser.hpp ./src/generator.hpp ./src/tokenizer.cpp
 	g++ -fdiagnostics-color=always -g ./src/*.cpp -o ./crust

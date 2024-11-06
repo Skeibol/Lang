@@ -1,6 +1,4 @@
 #include "./generator.hpp"
-#include "./parser.hpp"
-#include "./tokenizer.hpp"
 #include <fstream>
 #include <iostream>
 #include <optional>
@@ -37,6 +35,17 @@ int main(int argc, char const *argv[]) {
     std::vector<Token> tokens = tokenizer.tokenize();
 
     Parser parser(std::move(tokens));
+    std::optional<node::Program> program = parser.parseProgram();
+
+    if (!program.has_value())
+    {
+        std::cerr << "Invalid program" << std::endl;
+    }
+
+    Generator generator(program.value());
+    writeToFile(generator.generateProgram());
+
+
 
 
     system("nasm -felf64 ./build/out.asm");

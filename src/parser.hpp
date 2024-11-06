@@ -74,7 +74,7 @@ public:
                 statementExit = {.expression = nodeExpression.value()};
             } else
             {
-                std::cerr << "Invalid expression" << std::endl;
+                std::cerr << "Invalide expression" << std::endl;
                 exit(EXIT_FAILURE);
             }
 
@@ -111,7 +111,7 @@ public:
                 statementLet.expression = parseExpression().value();
             } else
             {
-                std::cerr << "invalid expression" << std::endl;
+                std::cerr << "invalid expressionc" << std::endl;
                 exit(EXIT_FAILURE);
             }
 
@@ -126,6 +126,8 @@ public:
 
             return node::Statement{.type = statementLet};
         }
+
+        return {};
     }
 
     std::optional<node::Program> parseProgram() {
@@ -136,6 +138,7 @@ public:
             {
                 program.statements.push_back(stmt.value());
             }
+            consume();
         }
 
         return program;
@@ -163,7 +166,7 @@ private:
     std::vector<Token> consumeMultiple(int const amount) {
         std::vector<Token> consumedTokens;
 
-        for (size_t i = 1; i < amount; i++)
+        for (size_t i = 1; i <= amount; i++)
         {
             consumedTokens.push_back(consume());
         }
