@@ -1,1 +1,3 @@
-return(45);
+nekaje x jednako 7;
+nekaje y jednako 8;
+vratimi(y);

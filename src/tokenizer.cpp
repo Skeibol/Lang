@@ -1,4 +1,5 @@
 #include "tokenizer.hpp"
+#include <iostream>
 
 Tokenizer::Tokenizer(std::string src)
     : m_source(std::move(src))
@@ -34,6 +35,7 @@ std::vector<Token> Tokenizer::tokenize()
       else
       {
         tokens.push_back({TokenType::_identifier, buffer});
+        buffer.clear();
       }
     }
     else if (std::isdigit(peek().value()))
@@ -64,7 +66,7 @@ std::vector<Token> Tokenizer::tokenize()
       tokens.push_back({TokenType::_semi});
       continue;
     }
-    else if (peek().value() == ';')
+    else if (peek().value() == '=')
     {
       consume();
       tokens.push_back({TokenType::_equals});

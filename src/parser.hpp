@@ -66,6 +66,7 @@ public:
 
     std::optional<node::Statement> parseStatement() {
         node::StatementExit statementExit;
+
         if (checkTokenType(TokenType::_exit) && checkTokenType(TokenType::_paren_open, 1))
         {
             consumeMultiple(2);
@@ -95,12 +96,13 @@ public:
                 std::cerr << "Expected ';'" << std::endl;
                 exit(EXIT_FAILURE);
             }
-            m_currentIndex = 0;
+
             return node::Statement{.type = statementExit};
         }
-        if (checkTokenType(TokenType::_let), checkTokenType(TokenType::_identifier, 1), checkTokenType(
+        if (checkTokenType(TokenType::_let) && checkTokenType(TokenType::_identifier, 1) && checkTokenType(
                 TokenType::_equals, 2))
         {
+
             consume(); // Consume 'let'
             node::StatementLet statementLet = node::StatementLet{
                 .identifier = consume() // Consume variable name
@@ -108,7 +110,7 @@ public:
             consume(); // Consume '='
             if (auto expr = parseExpression())
             {
-                statementLet.expression = parseExpression().value();
+                statementLet.expression = expr.value();
             } else
             {
                 std::cerr << "invalid expressionc" << std::endl;
@@ -132,13 +134,17 @@ public:
 
     std::optional<node::Program> parseProgram() {
         node::Program program;
+
         while (peek().has_value())
         {
             if (auto stmt = parseStatement())
             {
                 program.statements.push_back(stmt.value());
+            } else
+            {
+                consume();
             }
-            consume();
+
         }
 
         return program;
@@ -146,7 +152,7 @@ public:
 
 private:
     size_t m_currentIndex = 0;
-    const std::vector<Token> m_tokens;
+    const std::vector<Token> m_tokens {};
 
     [[nodiscard]] std::optional<Token> peek(int const amount = 0) const {
         if (m_currentIndex + amount >= m_tokens.size())
@@ -174,7 +180,7 @@ private:
         return consumedTokens;
     }
 
-    bool checkTokenType(TokenType const typeToCheck, int const amount = 0) const {
+    [[nodiscard]] bool checkTokenType(TokenType const typeToCheck, int const amount = 0) const {
         return peek(amount).has_value() && peek(amount).value().type == typeToCheck;
     }
 };

@@ -1,7 +1,4 @@
 #pragma once
-
-#include <fstream>
-#include <iostream>
 #include <optional>
 #include <string>
 #include <vector>
@@ -18,7 +15,7 @@ enum class TokenType {
 };
 
 struct Token {
-    TokenType type;
+    TokenType type{};
     std::optional<std::string> value;
 };
 

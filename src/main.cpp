@@ -5,7 +5,7 @@
 #include <sstream>
 #include <vector>
 
-std::string readFileContents(std::string codePath) {
+std::string readFileContents(std::string const &codePath) {
     std::string code;
     std::stringstream content_stream;
     std::fstream input(codePath, std::ios::in);
@@ -15,7 +15,7 @@ std::string readFileContents(std::string codePath) {
     return code;
 }
 
-void writeToFile(std::string fileContents) {
+void writeToFile(std::string const &fileContents) {
     std::fstream file("./build/out.asm", std::ios::out);
     file << fileContents;
     std::cout << fileContents;
@@ -44,8 +44,6 @@ int main(int argc, char const *argv[]) {
 
     Generator generator(program.value());
     writeToFile(generator.generateProgram());
-
-
 
 
     system("nasm -felf64 ./build/out.asm");
