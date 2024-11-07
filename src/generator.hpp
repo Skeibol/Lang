@@ -42,11 +42,24 @@ public:
             Generator *gen;
 
             void operator()(const node::StatementExit &stmt_exit) const {
+                gen->m_output << "    ;; Exit statement start\n"; // TODO cmp rdx, rax
                 gen->generateExpression(stmt_exit.expression);
 
                 gen->m_output << "    mov rax, 60\n"; // TODO
                 gen->pop("rdi");
                 gen->m_output << "    syscall\n";
+                gen->m_output << "    ;; Exit statement end - rax calls exit, rdi provides arguement(exit code)\n"; // TODO cmp rdx, rax
+            }
+            void operator()(const node::StatementEquality &stmt_equality) const {
+                gen->m_output << "    ;; equality start\n"; // TODO
+                gen->generateExpression(stmt_equality.expressionLeft);
+                gen->pop("rbx");
+                gen->generateExpression(stmt_equality.expressionRight);
+                gen->pop("rcx");
+                gen->m_output << "    cmp rbx, rcx\n";
+                gen->m_output << "    ;; equality end compare rax 1 == rax 2 - use jl flag\n";
+
+
             }
 
             void operator()(const node::StatementLet &stmt_let) const {

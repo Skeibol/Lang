@@ -1,3 +1,4 @@
-nekaje x jednako 7;
-nekaje y jednako 8;
-vratimi(y);
+let x = 32;
+23=23;
+let y = x;
+return(y);
