@@ -9,6 +9,7 @@ Tokenizer::Tokenizer(std::string src)
 
 std::vector<Token> Tokenizer::tokenize()
 {
+
   std::string buffer;
   std::vector<Token> tokens = {};
 
