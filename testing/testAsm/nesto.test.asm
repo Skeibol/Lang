@@ -1,7 +1,11 @@
 global _start
 _start:
+    mov rax, 25
+    push rax
+    mov rax, 30
+    push rax
     ;; Exit statement start
-    mov rax, 40
+    mov rax, 23
     push rax
     mov rax, 60
     pop rdi

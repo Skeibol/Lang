@@ -7,6 +7,8 @@
 #include <variant>
 #include <vector>
 
+#include "arena.hpp"
+
 namespace node {
     struct ExpressionIntLit {
         Token int_lit;
@@ -17,63 +19,60 @@ namespace node {
     };
 
     struct Expression {
-        std::variant<ExpressionIntLit, ExpressionIdentifier> type;
+        std::variant<ExpressionIntLit *, ExpressionIdentifier *> type;
     };
 
     struct StatementExit {
-        Expression expression;
+        Expression *expression;
     };
 
-    struct StatementEquality {
-        Expression expressionLeft;
-        Expression expressionRight;
-    };
 
 
     struct StatementLet {
         Token identifier;
-        Expression expression;
+        Expression *expression;
     };
 
     struct Statement {
-        std::variant<StatementExit, StatementLet, StatementEquality> type;
+        std::variant<StatementExit *, StatementLet *> type;
     };
 
     struct Program {
-        std::vector<Statement> statements;
+        std::vector<Statement*> statements;
     };
 } // namespace node
 
 class Parser {
 public:
-    inline explicit Parser(std::vector<Token> token) : m_tokens(std::move(token)) {
+    inline explicit Parser(std::vector<Token> token) : m_tokens(std::move(token)), m_arena(1024 * 1024 * 4) {
     }
 
-    std::optional<node::Expression> parseExpression() {
+    std::optional<node::Expression*> parseExpression() {
         if (checkTokenType(TokenType::_int_lit)) {
-            return node::Expression{
-                .type = node::ExpressionIntLit{
-                    .int_lit = consume()
-                }
-            };
+            auto *expressionIntLit = m_arena.allocate<node::ExpressionIntLit>();
+            expressionIntLit->int_lit = consume();
+            auto *expression = m_arena.allocate<node::Expression>();
+            expression->type = expressionIntLit;
+            return expression;
         } else if (checkTokenType(TokenType::_identifier)) {
-            return node::Expression{
-                .type = node::ExpressionIdentifier{
-                    .identifier = consume()
-                }
-            };
+            auto *expressionIdentifier = m_arena.allocate<node::ExpressionIdentifier>();
+            expressionIdentifier->identifier = consume();
+            auto *expression = m_arena.allocate<node::Expression>();
+            expression->type = expressionIdentifier;
+            return expression;
         } else {
             return {};
         }
     }
 
-    std::optional<node::Statement> parseStatement() {
-        node::StatementExit statementExit;
+    std::optional<node::Statement*> parseStatement() {
+
 
         if (checkTokenType(TokenType::_exit) && checkTokenType(TokenType::_paren_open, 1)) {
             consumeMultiple(2);
+            auto *statementExit = m_arena.allocate<node::StatementExit>();
             if (auto nodeExpression = parseExpression()) {
-                statementExit = {.expression = nodeExpression.value()};
+                statementExit->expression = nodeExpression.value();
             } else {
                 std::cerr << "Invalide expression" << std::endl;
                 exit(EXIT_FAILURE);
@@ -92,18 +91,18 @@ public:
                 std::cerr << "Expected ';'" << std::endl;
                 exit(EXIT_FAILURE);
             }
-
-            return node::Statement{.type = statementExit};
+            auto nodeStatement = m_arena.allocate<node::Statement>();
+            nodeStatement->type = statementExit;
+            return nodeStatement;
         }
         if (checkTokenType(TokenType::_let) && checkTokenType(TokenType::_identifier, 1) && checkTokenType(
                 TokenType::_equals, 2)) {
             consume(); // Consume 'let'
-            node::StatementLet statementLet = node::StatementLet{
-                .identifier = consume() // Consume variable name
-            };
+            auto statementLet = m_arena.allocate<node::StatementLet>();
+            statementLet->identifier = consume(); // consume variable name
             consume(); // Consume '='
             if (auto expr = parseExpression()) {
-                statementLet.expression = expr.value();
+                statementLet->expression = expr.value();
             } else {
                 std::cerr << "invalid expressionc" << std::endl;
                 exit(EXIT_FAILURE);
@@ -116,49 +115,36 @@ public:
                 exit(EXIT_FAILURE);
             }
 
-            return node::Statement{.type = statementLet};
+            auto nodeStatement = m_arena.allocate<node::Statement>();
+            nodeStatement->type = statementLet;
+            return nodeStatement;
         }
-        if ((checkTokenType(TokenType::_int_lit) || checkTokenType(TokenType::_identifier))
-            && checkTokenType(TokenType::_equals, 1) &&
-            (checkTokenType(TokenType::_int_lit, 2) || checkTokenType(TokenType::_identifier, 2))) {
-            std::cout << "expected once";
-            node::StatementEquality statementEquality = node::StatementEquality{};
-            if (auto nodeEquality = parseExpression()) {
-                statementEquality.expressionLeft = nodeEquality.value();
-            } else {
-                std::cerr << "Invalid expression on leftside" << std::endl;
-                exit(EXIT_FAILURE);
-            }
-            consume();
-            if (auto nodeEquality = parseExpression()) {
-                statementEquality.expressionRight = nodeEquality.value();
-            } else {
-                std::cerr << "Invalid expression on rightside" << std::endl;
-                exit(EXIT_FAILURE);
-            }
-            return node::Statement{.type = statementEquality};
-        }
+
 
         return {};
     }
 
-    std::optional<node::Program> parseProgram() {
-        node::Program program;
+    std::optional<node::Program*> parseProgram() {
+        auto programNode = m_arena.allocate<node::Program>();
+
+
 
         while (peek().has_value()) {
             if (auto stmt = parseStatement()) {
-                program.statements.push_back(stmt.value());
+                programNode->statements.push_back(stmt.value());
             } else {
                 consume();
             }
         }
 
-        return program;
+        return programNode;
     }
 
+
 private:
-    size_t m_currentIndex = 0;
     const std::vector<Token> m_tokens{};
+    ArenaAllocator m_arena;
+    size_t m_currentIndex = 0;
 
     [[nodiscard]] std::optional<Token> peek(int const amount = 0) const {
         if (m_currentIndex + amount >= m_tokens.size()) {

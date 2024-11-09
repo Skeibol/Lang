@@ -52,37 +52,36 @@ void test() {
     std::vector<std::string> linkerStr{};
     for (int i = 0; i < foundTestFiles.size(); i++) {
         std::string fileContents = readFileContents(foundTestFiles[i]);
-
-        Tokenizer tokenizer(std::move(fileContents));
-        std::vector<Token> tokens = tokenizer.tokenize();
-
-        Parser parser(std::move(tokens));
-        std::optional<node::Program> program = parser.parseProgram();
-
-        if (!program.has_value()) {
-            std::cerr << "Invalid program" << std::endl;
-        }
-
-        Generator generator(program.value());
-
-
         std::string programName = foundTestFiles[i].erase(foundTestFiles[i].length() - 4);
+        std::cout << "Try compile program -> " << programName << '\n';
         programName = programName.erase(0, 10);
         auto outputName = programName;
         outputName.erase(outputName.length() - 5);
         std::fstream file("./testing/testAsm/" + programName + ".asm", std::ios::out);
-        file << generator.generateProgram();
+
+        auto *tokenizer = new Tokenizer(std::move(fileContents));
+
+        std::vector<Token> tokens = tokenizer->tokenize();
+        auto *parser = new Parser(std::move(tokens));
+
+        std::optional<node::Program*> program = parser->parseProgram();
+
+        if (!program.has_value()) {
+            std::cerr << "Invalid program" << std::endl;
+        }
+        auto *generator = new Generator(program.value());
+        file << generator->generateProgram();
 
         /*
-
         nasm -felf64 ./test/testAsm/code.test.asm
 
         ld -o ./test/code ./test/testAsm/code.test.o
-
-         *
          */
         nasmStr.push_back("nasm -felf64 ./testing/testAsm/" + programName + ".asm");
         linkerStr.push_back("ld -o ./testing/" + outputName + " ./testing/testAsm/" + programName + ".o");
+        std::cout << generator << " <- gen address " << parser << " <- parser address " << tokenizer << " <- tokenizer address\n";
+        std::cout << "Compiled program -> " << programName << '\n';
+
     }
     for (int i = 0; i < nasmStr.size(); i++) {
         int linkResult = system(nasmStr[i].c_str());
@@ -93,6 +92,7 @@ void test() {
         if (nasmResult) {
             std::cout << nasmResult << " - nasm error" << '\n';
         }
+
         std::cout << foundTestFiles[i] << " - File succesfuly compiled" << '\n';
     }
 }
@@ -111,7 +111,7 @@ int main(int argc, char const *argv[]) {
     std::vector<Token> tokens = tokenizer.tokenize();
 
     Parser parser(std::move(tokens));
-    std::optional<node::Program> program = parser.parseProgram();
+    std::optional<node::Program*> program = parser.parseProgram();
 
     if (!program.has_value()) {
         std::cerr << "Invalid program" << std::endl;

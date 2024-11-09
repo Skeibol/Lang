@@ -1,4 +1,3 @@
 let x = 32;
-23=23;
 let y = x;
 return(y);
