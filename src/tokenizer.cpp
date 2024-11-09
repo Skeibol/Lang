@@ -26,12 +26,10 @@ std::vector<Token> Tokenizer::tokenize()
       {
         tokens.push_back({TokenType::_exit});
         buffer.clear();
-        continue;
       }
       else if(buffer == "let") {
         tokens.push_back({TokenType::_let});
         buffer.clear();
-        continue;
       }
       else
       {
@@ -53,30 +51,31 @@ std::vector<Token> Tokenizer::tokenize()
     {
       consume();
       tokens.push_back({TokenType::_paren_open});
-      continue;
     }
     else if (peek().value() == ')')
     {
       consume();
       tokens.push_back({TokenType::_paren_close});
-      continue;
+    }
+    else if (peek().value() == '+')
+    {
+      buffer.push_back(consume());
+      tokens.push_back({TokenType::_plus,buffer});
+      buffer.clear();
     }
     else if (peek().value() == ';')
     {
       consume();
       tokens.push_back({TokenType::_semi});
-      continue;
     }
     else if (peek().value() == '=')
     {
       consume();
       tokens.push_back({TokenType::_equals});
-      continue;
     }
     else if (std::isspace(peek().value()))
     {
       consume();
-      continue;
     }
     else
     {

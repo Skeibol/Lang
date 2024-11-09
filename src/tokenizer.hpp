@@ -12,6 +12,7 @@ enum class TokenType {
     _identifier,
     _let,
     _equals,
+    _plus
 };
 
 struct Token {

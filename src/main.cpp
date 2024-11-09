@@ -79,7 +79,7 @@ void test() {
          */
         nasmStr.push_back("nasm -felf64 ./testing/testAsm/" + programName + ".asm");
         linkerStr.push_back("ld -o ./testing/" + outputName + " ./testing/testAsm/" + programName + ".o");
-        std::cout << generator << " <- gen address " << parser << " <- parser address " << tokenizer << " <- tokenizer address\n";
+        //std::cout << generator << " <- gen address " << parser << " <- parser address " << tokenizer << " <- tokenizer address\n";
         std::cout << "Compiled program -> " << programName << '\n';
 
     }

@@ -10,22 +10,33 @@
 #include "arena.hpp"
 
 namespace node {
-    struct ExpressionIntLit {
+    struct TermIntLit {
         Token int_lit;
     };
 
-    struct ExpressionIdentifier {
+    struct TermIdentifier {
         Token identifier;
     };
 
+    struct TermOperand {
+        Token op;
+    };
+
+    struct Term {
+        std::variant<TermIntLit *, TermIdentifier *, TermOperand *> type;
+    };
+
+    struct ExpressionEquation {
+        std::vector<Term *> terms;
+    };
+
     struct Expression {
-        std::variant<ExpressionIntLit *, ExpressionIdentifier *> type;
+        std::variant<ExpressionEquation *> type;
     };
 
     struct StatementExit {
         Expression *expression;
     };
-
 
 
     struct StatementLet {
@@ -38,7 +49,7 @@ namespace node {
     };
 
     struct Program {
-        std::vector<Statement*> statements;
+        std::vector<Statement *> statements;
     };
 } // namespace node
 
@@ -47,48 +58,89 @@ public:
     inline explicit Parser(std::vector<Token> token) : m_tokens(std::move(token)), m_arena(1024 * 1024 * 4) {
     }
 
-    std::optional<node::Expression*> parseExpression() {
+    std::optional<node::Term *> parseTerm() {
         if (checkTokenType(TokenType::_int_lit)) {
-            auto *expressionIntLit = m_arena.allocate<node::ExpressionIntLit>();
-            expressionIntLit->int_lit = consume();
-            auto *expression = m_arena.allocate<node::Expression>();
-            expression->type = expressionIntLit;
-            return expression;
+            auto *termIntLit = m_arena.allocate<node::TermIntLit>();
+            termIntLit->int_lit = consume();
+            auto *term = m_arena.allocate<node::Term>();
+            term->type = termIntLit;
+            return term;
         } else if (checkTokenType(TokenType::_identifier)) {
-            auto *expressionIdentifier = m_arena.allocate<node::ExpressionIdentifier>();
-            expressionIdentifier->identifier = consume();
-            auto *expression = m_arena.allocate<node::Expression>();
-            expression->type = expressionIdentifier;
-            return expression;
+            auto *termIdentifier = m_arena.allocate<node::TermIdentifier>();
+            termIdentifier->identifier = consume();
+            auto *term = m_arena.allocate<node::Term>();
+            term->type = termIdentifier;
+            return term;
+        } else if (checkTokenType(TokenType::_plus)) {
+            auto *termOperand = m_arena.allocate<node::TermOperand>();
+            termOperand->op = consume();
+            auto *term = m_arena.allocate<node::Term>();
+            term->type = termOperand;
+            return term;
         } else {
             return {};
         }
     }
 
-    std::optional<node::Statement*> parseStatement() {
+    std::optional<node::Expression *> parseExpression() {
+        if (checkTokenType(TokenType::_int_lit) || checkTokenType(TokenType::_identifier)) {
+            auto nodeExpression = m_arena.allocate<node::Expression>();
+            auto nodeExpressionEquation = m_arena.allocate<node::ExpressionEquation>();
+            while (checkTokenType(TokenType::_int_lit) || checkTokenType(TokenType::_identifier)) {
+                if (auto term = parseTerm()) {
+                    nodeExpressionEquation->terms.push_back(term.value());
+                } else {
+                    printErrorMessage("Error parsing integer", "parseExpression , int_lit checking");
+                    exit(EXIT_FAILURE);
+                }
+                if (checkTokenType(TokenType::_plus)) {
+                    if (auto term = parseTerm()) {
+                        if (handleEquationTerms(term.value()).has_value()) {
+                            nodeExpressionEquation->terms.push_back(term.value());
+                        } else {
+                            std::cout << "Returned empty, implement";
+                        }
+                    }
+                    if (!checkTokenType(TokenType::_int_lit) && !checkTokenType(TokenType::_identifier)) {
+                        printErrorMessage("Expected int_lit or identifier after operand", "parseExpression");
+                    }
+                }
+            }
+            for(int i = 0; i < operatorStack.size(); ++i) {
+                nodeExpressionEquation->terms.push_back(&operatorStack.at(i));
+            }
+
+            resetOperatorStack();
+            nodeExpression->type = nodeExpressionEquation;
+            return nodeExpression;
+        }
+
+        return {};
+    }
 
 
+    std::optional<node::Statement *> parseStatement() {
         if (checkTokenType(TokenType::_exit) && checkTokenType(TokenType::_paren_open, 1)) {
             consumeMultiple(2);
             auto *statementExit = m_arena.allocate<node::StatementExit>();
             if (auto nodeExpression = parseExpression()) {
                 statementExit->expression = nodeExpression.value();
             } else {
-                std::cerr << "Invalide expression" << std::endl;
+                printErrorMessage("Expected expression in return", "parseStatement, exit checking");
                 exit(EXIT_FAILURE);
             }
 
             if (checkTokenType(TokenType::_paren_close)) {
                 consume();
             } else {
-                std::cerr << "Expected ')'" << std::endl;
+                printErrorMessage("Missing parenthesis ) in return", "parseStatement, exit checking");
                 exit(EXIT_FAILURE);
             }
 
             if (checkTokenType(TokenType::_semi)) {
                 consume();
             } else {
-                std::cerr << "Expected ';'" << std::endl;
+                printErrorMessage("Expected semicolon in return", "parseStatement, exit checking");
                 exit(EXIT_FAILURE);
             }
             auto nodeStatement = m_arena.allocate<node::Statement>();
@@ -104,14 +156,14 @@ public:
             if (auto expr = parseExpression()) {
                 statementLet->expression = expr.value();
             } else {
-                std::cerr << "invalid expressionc" << std::endl;
+                printErrorMessage("Invalid expression in let", "parseStatement, let checking");
                 exit(EXIT_FAILURE);
             }
 
             if (checkTokenType(TokenType::_semi)) {
                 consume();
             } else {
-                std::cerr << "expected token ;" << std::endl;
+                printErrorMessage("Expected semi in let", "parseStatement, exit checking");
                 exit(EXIT_FAILURE);
             }
 
@@ -120,13 +172,11 @@ public:
             return nodeStatement;
         }
 
-
         return {};
     }
 
-    std::optional<node::Program*> parseProgram() {
+    std::optional<node::Program *> parseProgram() {
         auto programNode = m_arena.allocate<node::Program>();
-
 
 
         while (peek().has_value()) {
@@ -140,11 +190,31 @@ public:
         return programNode;
     }
 
-
 private:
     const std::vector<Token> m_tokens{};
+    std::vector<node::Term> operatorStack{};
     ArenaAllocator m_arena;
     size_t m_currentIndex = 0;
+
+    void pushOperatorStack(const node::Term &term) {
+        operatorStack.push_back(term);
+    }
+
+    void popOperatorStack() {
+    }
+
+    void resetOperatorStack() {
+        operatorStack.clear();
+    }
+
+    std::optional<node::Term*> handleEquationTerms(node::Term* term) {
+        if (operatorStack.empty()) {
+            pushOperatorStack(*term); // Push a copy of *term onto the stack
+            return {}; // Return an empty optional if operatorStack was empty
+        }
+
+        return term; // Return the same term pointer if operatorStack was not empty
+    }
 
     [[nodiscard]] std::optional<Token> peek(int const amount = 0) const {
         if (m_currentIndex + amount >= m_tokens.size()) {
@@ -167,6 +237,17 @@ private:
         }
 
         return consumedTokens;
+    }
+
+
+
+
+    void printErrorMessage(std::string const &message, std::string const &functionName) const {
+        std::cerr << message << std::endl;
+        std::cerr << "In file parser.hpp, function " << functionName << "\n";
+        std::cerr << "At index > " << m_currentIndex << "\n" << std::endl;
+
+        exit(EXIT_FAILURE);
     }
 
     [[nodiscard]] bool checkTokenType(TokenType const typeToCheck, int const amount = 0) const {
