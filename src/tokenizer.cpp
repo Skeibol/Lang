@@ -31,6 +31,10 @@ std::vector<Token> Tokenizer::tokenize()
         tokens.push_back({TokenType::_let});
         buffer.clear();
       }
+      else if(buffer == "print") {
+        tokens.push_back({TokenType::_print});
+        buffer.clear();
+      }
       else
       {
         tokens.push_back({TokenType::_identifier, buffer});

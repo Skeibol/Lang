@@ -38,6 +38,10 @@ namespace node {
         Expression *expression;
     };
 
+    struct StatementPrint {
+        Expression *expression;
+    };
+
 
     struct StatementLet {
         Token identifier;
@@ -45,7 +49,7 @@ namespace node {
     };
 
     struct Statement {
-        std::variant<StatementExit *, StatementLet *> type;
+        std::variant<StatementExit *, StatementLet *, StatementPrint *> type;
     };
 
     struct Program {
@@ -106,7 +110,7 @@ public:
                     }
                 }
             }
-            for(int i = 0; i < operatorStack.size(); ++i) {
+            for (int i = 0; i < operatorStack.size(); ++i) {
                 nodeExpressionEquation->terms.push_back(&operatorStack.at(i));
             }
 
@@ -171,6 +175,35 @@ public:
             nodeStatement->type = statementLet;
             return nodeStatement;
         }
+        if (checkTokenType(TokenType::_print) && checkTokenType(TokenType::_paren_open, 1)) {
+            consume(); // Consume 'print'
+            consume(); // Consume 'paren'
+            auto statementPrint = m_arena.allocate<node::StatementPrint>();
+            if (auto expr = parseExpression()) {
+                statementPrint->expression = expr.value();
+            } else {
+                printErrorMessage("Invalid expression in print", "parseStatement, printing");
+                exit(EXIT_FAILURE);
+            }
+            if (checkTokenType(TokenType::_paren_close)) {
+                consume();
+
+            } else {
+                printErrorMessage("No closed parens in print", "parseStatement, printing");
+                exit(EXIT_FAILURE);
+            }
+
+            if (checkTokenType(TokenType::_semi)) {
+                consume();
+            } else {
+                printErrorMessage("Expected semi in print", "parseStatement, printing");
+                exit(EXIT_FAILURE);
+            }
+
+            auto nodeStatement = m_arena.allocate<node::Statement>();
+            nodeStatement->type = statementPrint;
+            return nodeStatement;
+        }
 
         return {};
     }
@@ -207,7 +240,7 @@ private:
         operatorStack.clear();
     }
 
-    std::optional<node::Term*> handleEquationTerms(node::Term* term) {
+    std::optional<node::Term *> handleEquationTerms(node::Term *term) {
         if (operatorStack.empty()) {
             pushOperatorStack(*term); // Push a copy of *term onto the stack
             return {}; // Return an empty optional if operatorStack was empty
@@ -238,8 +271,6 @@ private:
 
         return consumedTokens;
     }
-
-
 
 
     void printErrorMessage(std::string const &message, std::string const &functionName) const {

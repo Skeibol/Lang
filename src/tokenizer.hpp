@@ -5,6 +5,7 @@
 
 enum class TokenType {
     _exit,
+    _print,
     _int_lit,
     _semi,
     _paren_open,

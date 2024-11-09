@@ -73,25 +73,7 @@ public:
                 gen->pop("rdi");
                 gen->m_output << "    syscall\n";
                 gen->m_output << "    ;; Exit statement end - rax calls exit, rdi provides arguement(exit code)\n";
-                // TODO cmp rdx, rax
             }
-
-            // void operator()(const node::StatementEquality &stmt_equality) const
-            // {
-            //   gen->m_output << "    ;; equality start\n"; // TODO
-            //   gen->generateExpression(stmt_equality.expressionLeft);
-            //   gen->pop("rbx");
-            //   gen->generateExpression(stmt_equality.expressionRight);
-            //   gen->pop("rcx");
-            //   gen->m_output << "    cmp rbx, rcx\n";
-            //   gen->m_output << "    jz if_false\n";
-            //   gen->m_output << "    mov rax, 1\n";
-            //   gen->m_output << "    jmp if_true\n";
-            //   gen->m_output << ".if_false:\n";
-            //   gen->m_output << "    mov rax, 0\n";
-            //   gen->m_output << ".if_true:\n";
-            //   gen->m_output << "    push rax\n;; equality end compare rax 1 == rax 2 - use jl flag\n";
-            // }
 
             void operator()(const node::StatementLet *stmt_let) const {
                 if (gen->m_variables.count(stmt_let->identifier.value.value())) {
@@ -101,13 +83,73 @@ public:
                 gen->m_variables.insert({stmt_let->identifier.value.value(), Variable{gen->m_stackPointerOffset}});
                 gen->generateExpression(stmt_let->expression);
             }
+
+            void operator()(const node::StatementPrint *stmt_print) const {
+                gen->m_output << "    ;; Print statement start\n"; // TODO cmp rdx, rax
+                gen->generateExpression(stmt_print->expression);
+                gen->pop("rdi");
+                gen->m_output << "    call dump\n";
+                gen->m_output << "    ;; Print end - rax calls print, rdi provides arguement(what to print)\n";
+            }
         };
 
         StatementVisitor visitor{.gen = this};
         std::visit(visitor, statement->type);
     }
 
+
     std::string generateProgram() {
+
+    m_output << R"(dump:
+    push    rbp
+    mov     rbp, rsp
+    sub     rsp, 64
+    mov     QWORD [rbp-56], rdi
+    mov     QWORD [rbp-8], 1
+    mov     eax, 32
+    sub     rax, QWORD [rbp-8]
+    mov     BYTE [rbp-48+rax], 10
+.L2:
+    mov     rcx, QWORD [rbp-56]
+    mov  rdx, -3689348814741910323
+    mov     rax, rcx
+    mul     rdx
+    shr     rdx, 3
+    mov     rax, rdx
+    sal     rax, 2
+    add     rax, rdx
+    add     rax, rax
+    sub     rcx, rax
+    mov     rdx, rcx
+    mov     eax, edx
+    lea     edx, [rax+48]
+    mov     eax, 31
+    sub     rax, QWORD [rbp-8]
+    mov     BYTE [rbp-48+rax], dl
+    add     QWORD [rbp-8], 1
+    mov     rax, QWORD [rbp-56]
+    mov     rdx, -3689348814741910323
+    mul     rdx
+    mov     rax, rdx
+    shr     rax, 3
+    mov     QWORD [rbp-56], rax
+    cmp     QWORD [rbp-56], 0
+    jne     .L2
+    mov     eax, 32
+    sub     rax, QWORD [rbp-8]
+    lea     rdx, [rbp-48]
+    lea     rcx, [rdx+rax]
+    mov     rax, QWORD [rbp-8]
+    mov     rdx, rax
+    mov     rsi, rcx
+    mov     edi, 1
+    mov     eax, 0
+    mov     rax, 1
+    syscall
+    nop
+    leave
+    ret
+)";
         m_output << "global _start\n_start:\n";
 
         for (const node::Statement *stmt: m_program->statements) {
