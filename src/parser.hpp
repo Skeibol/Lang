@@ -133,6 +133,7 @@ public:
             }
 
             nodeExpression->type = nodeExpressionEquation;
+            m_equation.clear();
             return nodeExpression;
         }
 
@@ -273,7 +274,7 @@ private:
 
         for (auto &equationTerm: m_equation)
         {
-            if (equationTerm.type == TokenType::_int_lit)
+            if (equationTerm.type == TokenType::_int_lit || equationTerm.type == TokenType::_identifier)
             {
                 output.push_back(equationTerm); // Always push numbers
             } else
@@ -297,7 +298,7 @@ private:
         {
             output.push_back(operatorStack.at(i));
         }
-        m_equation.clear();
+
         return output;
     }
 
