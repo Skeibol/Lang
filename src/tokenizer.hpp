@@ -13,12 +13,14 @@ enum class TokenType {
     _identifier,
     _let,
     _equals,
-    _plus
+    _plus,
+    _multiply,
 };
 
 struct Token {
     TokenType type{};
     std::optional<std::string> value;
+    std::optional<int> precedence;
 };
 
 class Tokenizer {

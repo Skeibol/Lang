@@ -20,7 +20,8 @@ public:
             }
 
             void operator()(const node::TermOperand *term_operand) const {
-                if (term_operand->op.value.value() == "+") {
+                if (term_operand->op.value.value() == "+")
+                {
                     gen->pop("rax");
                     gen->pop("rbx");
                     gen->m_output << "    add rax,rbx\n";
@@ -29,7 +30,8 @@ public:
             }
 
             void operator()(const node::TermIdentifier *term_identifier) const {
-                if (gen->m_variables.count(term_identifier->identifier.value.value()) == 0) {
+                if (gen->m_variables.count(term_identifier->identifier.value.value()) == 0)
+                {
                     std::cerr << "Variable(identifier) not declared :" << term_identifier->identifier.value.value();
                     exit(EXIT_FAILURE);
                 }
@@ -51,7 +53,8 @@ public:
             Generator *gen;
 
             void operator()(const node::ExpressionEquation *equation) const {
-                for (const node::Term *term: equation->terms) {
+                for (const node::Term *term: equation->terms)
+                {
                     gen->generateTerm(term);
                 }
             }
@@ -76,7 +79,8 @@ public:
             }
 
             void operator()(const node::StatementLet *stmt_let) const {
-                if (gen->m_variables.count(stmt_let->identifier.value.value())) {
+                if (gen->m_variables.count(stmt_let->identifier.value.value()))
+                {
                     std::cerr << "Identifier already declared :" << stmt_let->identifier.value.value();
                     exit(EXIT_FAILURE);
                 }
@@ -99,8 +103,7 @@ public:
 
 
     std::string generateProgram() {
-
-    m_output << R"(dump:
+        m_output << R"(dump:
     push    rbp
     mov     rbp, rsp
     sub     rsp, 64
@@ -152,7 +155,8 @@ public:
 )";
         m_output << "global _start\n_start:\n";
 
-        for (const node::Statement *stmt: m_program->statements) {
+        for (const node::Statement *stmt: m_program->statements)
+        {
             generateStatement(stmt);
         }
 

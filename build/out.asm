@@ -50,19 +50,11 @@ dump:
 global _start
 _start:
     ;; Print statement start
+    mov rax, 2
+    push rax
     mov rax, 4
     push rax
-    mov rax, 23
-    push rax
-    pop rax
-    pop rbx
-    add rax,rbx
-    push rax
-    pop rdi
-    call dump
-    ;; Print end - rax calls print, rdi provides arguement(what to print)
-    ;; Print statement start
-    mov rax, 1
+    mov rax, 8
     push rax
     mov rax, 2
     push rax
@@ -70,11 +62,21 @@ _start:
     pop rbx
     add rax,rbx
     push rax
-    pop rdi
-    call dump
-    ;; Print end - rax calls print, rdi provides arguement(what to print)
-    ;; Print statement start
-    mov rax, 1
+    mov rax, 3
+    push rax
+    mov rax, 5
+    push rax
+    pop rax
+    pop rbx
+    add rax,rbx
+    push rax
+    mov rax, 5
+    push rax
+    pop rax
+    pop rbx
+    add rax,rbx
+    push rax
+    mov rax, 6
     push rax
     mov rax, 3
     push rax
@@ -86,7 +88,157 @@ _start:
     call dump
     ;; Print end - rax calls print, rdi provides arguement(what to print)
     ;; Print statement start
+    mov rax, 2
+    push rax
+    mov rax, 4
+    push rax
+    mov rax, 8
+    push rax
+    mov rax, 2
+    push rax
+    mov rax, 3
+    push rax
+    mov rax, 5
+    push rax
+    pop rax
+    pop rbx
+    add rax,rbx
+    push rax
+    mov rax, 5
+    push rax
+    pop rax
+    pop rbx
+    add rax,rbx
+    push rax
+    mov rax, 6
+    push rax
+    mov rax, 3
+    push rax
+    pop rax
+    pop rbx
+    add rax,rbx
+    push rax
     mov rax, 1
+    push rax
+    pop rax
+    pop rbx
+    add rax,rbx
+    push rax
+    mov rax, 2
+    push rax
+    pop rax
+    pop rbx
+    add rax,rbx
+    push rax
+    pop rdi
+    call dump
+    ;; Print end - rax calls print, rdi provides arguement(what to print)
+    ;; Print statement start
+    mov rax, 2
+    push rax
+    mov rax, 4
+    push rax
+    mov rax, 8
+    push rax
+    mov rax, 2
+    push rax
+    mov rax, 3
+    push rax
+    mov rax, 5
+    push rax
+    mov rax, 5
+    push rax
+    pop rax
+    pop rbx
+    add rax,rbx
+    push rax
+    mov rax, 6
+    push rax
+    mov rax, 3
+    push rax
+    pop rax
+    pop rbx
+    add rax,rbx
+    push rax
+    mov rax, 1
+    push rax
+    pop rax
+    pop rbx
+    add rax,rbx
+    push rax
+    mov rax, 2
+    push rax
+    pop rax
+    pop rbx
+    add rax,rbx
+    push rax
+    mov rax, 1
+    push rax
+    pop rax
+    pop rbx
+    add rax,rbx
+    push rax
+    mov rax, 3
+    push rax
+    pop rax
+    pop rbx
+    add rax,rbx
+    push rax
+    pop rdi
+    call dump
+    ;; Print end - rax calls print, rdi provides arguement(what to print)
+    ;; Print statement start
+    mov rax, 2
+    push rax
+    mov rax, 4
+    push rax
+    mov rax, 8
+    push rax
+    mov rax, 2
+    push rax
+    mov rax, 3
+    push rax
+    mov rax, 5
+    push rax
+    mov rax, 5
+    push rax
+    mov rax, 6
+    push rax
+    mov rax, 3
+    push rax
+    pop rax
+    pop rbx
+    add rax,rbx
+    push rax
+    mov rax, 1
+    push rax
+    pop rax
+    pop rbx
+    add rax,rbx
+    push rax
+    mov rax, 2
+    push rax
+    pop rax
+    pop rbx
+    add rax,rbx
+    push rax
+    mov rax, 1
+    push rax
+    pop rax
+    pop rbx
+    add rax,rbx
+    push rax
+    mov rax, 3
+    push rax
+    pop rax
+    pop rbx
+    add rax,rbx
+    push rax
+    mov rax, 1
+    push rax
+    pop rax
+    pop rbx
+    add rax,rbx
     push rax
     mov rax, 4
     push rax
@@ -98,7 +250,65 @@ _start:
     call dump
     ;; Print end - rax calls print, rdi provides arguement(what to print)
     ;; Print statement start
+    mov rax, 2
+    push rax
+    mov rax, 4
+    push rax
+    mov rax, 8
+    push rax
+    mov rax, 2
+    push rax
+    mov rax, 3
+    push rax
+    mov rax, 5
+    push rax
+    mov rax, 5
+    push rax
+    mov rax, 6
+    push rax
+    mov rax, 3
+    push rax
     mov rax, 1
+    push rax
+    pop rax
+    pop rbx
+    add rax,rbx
+    push rax
+    mov rax, 2
+    push rax
+    pop rax
+    pop rbx
+    add rax,rbx
+    push rax
+    mov rax, 1
+    push rax
+    pop rax
+    pop rbx
+    add rax,rbx
+    push rax
+    mov rax, 3
+    push rax
+    pop rax
+    pop rbx
+    add rax,rbx
+    push rax
+    mov rax, 1
+    push rax
+    pop rax
+    pop rbx
+    add rax,rbx
+    push rax
+    mov rax, 4
+    push rax
+    pop rax
+    pop rbx
+    add rax,rbx
+    push rax
+    mov rax, 1
+    push rax
+    pop rax
+    pop rbx
+    add rax,rbx
     push rax
     mov rax, 5
     push rax
@@ -111,6 +321,72 @@ _start:
     ;; Print end - rax calls print, rdi provides arguement(what to print)
     ;; Exit statement start
     mov rax, 2
+    push rax
+    mov rax, 4
+    push rax
+    mov rax, 8
+    push rax
+    mov rax, 2
+    push rax
+    mov rax, 3
+    push rax
+    mov rax, 5
+    push rax
+    mov rax, 5
+    push rax
+    mov rax, 6
+    push rax
+    mov rax, 3
+    push rax
+    mov rax, 1
+    push rax
+    mov rax, 2
+    push rax
+    pop rax
+    pop rbx
+    add rax,rbx
+    push rax
+    mov rax, 1
+    push rax
+    pop rax
+    pop rbx
+    add rax,rbx
+    push rax
+    mov rax, 3
+    push rax
+    pop rax
+    pop rbx
+    add rax,rbx
+    push rax
+    mov rax, 1
+    push rax
+    pop rax
+    pop rbx
+    add rax,rbx
+    push rax
+    mov rax, 4
+    push rax
+    pop rax
+    pop rbx
+    add rax,rbx
+    push rax
+    mov rax, 1
+    push rax
+    pop rax
+    pop rbx
+    add rax,rbx
+    push rax
+    mov rax, 5
+    push rax
+    pop rax
+    pop rbx
+    add rax,rbx
+    push rax
+    mov rax, 2
+    push rax
+    pop rax
+    pop rbx
+    add rax,rbx
     push rax
     mov rax, 60
     pop rdi

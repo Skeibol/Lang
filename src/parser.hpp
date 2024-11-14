@@ -59,62 +59,79 @@ namespace node {
 
 class Parser {
 public:
-    inline explicit Parser(std::vector<Token> token) : m_tokens(std::move(token)), m_arena(1024 * 1024 * 4) {
+    explicit Parser(std::vector<Token> token) : m_tokens(std::move(token)), m_arena(1024 * 1024 * 4) {
     }
 
-    std::optional<node::Term *> parseTerm() {
-        if (checkTokenType(TokenType::_int_lit)) {
+    std::optional<node::Term *> parseTerm(const Token &termToParse) {
+        if (termToParse.type == TokenType::_int_lit)
+        {
             auto *termIntLit = m_arena.allocate<node::TermIntLit>();
-            termIntLit->int_lit = consume();
+            termIntLit->int_lit = termToParse;
             auto *term = m_arena.allocate<node::Term>();
             term->type = termIntLit;
             return term;
-        } else if (checkTokenType(TokenType::_identifier)) {
+        }
+        if (termToParse.type == TokenType::_identifier)
+        {
             auto *termIdentifier = m_arena.allocate<node::TermIdentifier>();
-            termIdentifier->identifier = consume();
+            termIdentifier->identifier = termToParse;
             auto *term = m_arena.allocate<node::Term>();
             term->type = termIdentifier;
             return term;
-        } else if (checkTokenType(TokenType::_plus)) {
+        }
+        if (termToParse.type == TokenType::_plus || termToParse.type == TokenType::_multiply)
+        {
             auto *termOperand = m_arena.allocate<node::TermOperand>();
-            termOperand->op = consume();
+            termOperand->op = termToParse;
             auto *term = m_arena.allocate<node::Term>();
             term->type = termOperand;
             return term;
-        } else {
-            return {};
         }
+
+        return {};
     }
 
     std::optional<node::Expression *> parseExpression() {
-        if (checkTokenType(TokenType::_int_lit) || checkTokenType(TokenType::_identifier)) {
-            auto nodeExpression = m_arena.allocate<node::Expression>();
-            auto nodeExpressionEquation = m_arena.allocate<node::ExpressionEquation>();
-            while (checkTokenType(TokenType::_int_lit) || checkTokenType(TokenType::_identifier)) {
-                if (auto term = parseTerm()) {
-                    nodeExpressionEquation->terms.push_back(term.value());
-                } else {
-                    printErrorMessage("Error parsing integer", "parseExpression , int_lit checking");
-                    exit(EXIT_FAILURE);
-                }
-                if (checkTokenType(TokenType::_plus)) {
-                    if (auto term = parseTerm()) {
-                        if (handleEquationTerms(term.value()).has_value()) {
-                            nodeExpressionEquation->terms.push_back(term.value());
-                        } else {
-                            std::cout << "Returned empty, implement";
-                        }
-                    }
-                    if (!checkTokenType(TokenType::_int_lit) && !checkTokenType(TokenType::_identifier)) {
+        if (checkTokenType(TokenType::_int_lit) || checkTokenType(TokenType::_identifier))
+        {
+            // IDK IF THIS CHECK IS NEEDED
+            while (checkTokenType(TokenType::_int_lit) || checkTokenType(TokenType::_identifier))
+            {
+                // FIRST CREATE EQUATION
+                m_equation.push_back(consume());
+
+                if (checkTokenType(TokenType::_plus) || checkTokenType(TokenType::_multiply))
+                {
+                    m_equation.push_back(consume());
+
+                    if (!checkTokenType(TokenType::_int_lit) && !checkTokenType(TokenType::_identifier))
+                    {
                         printErrorMessage("Expected int_lit or identifier after operand", "parseExpression");
                     }
                 }
             }
-            for (int i = 0; i < operatorStack.size(); ++i) {
-                nodeExpressionEquation->terms.push_back(&operatorStack.at(i));
+
+            auto nodeExpression = m_arena.allocate<node::Expression>();
+            auto nodeExpressionEquation = m_arena.allocate<node::ExpressionEquation>();
+
+            if (m_equation.size() > 1)
+            {
+                m_equation = shuntingYard(); // shunting yard algorithm on the equation
             }
 
-            resetOperatorStack();
+            for (auto &equationTerm: m_equation)
+            {
+                if (auto term = parseTerm(equationTerm))
+                {
+                    // create nodes from reverse polish notation equation
+                    nodeExpressionEquation->terms.push_back(term.value());
+                } else
+                {
+                    printErrorMessage("Error parsing integer", "parseExpression , int_lit checking");
+                    exit(EXIT_FAILURE);
+                }
+            }
+
             nodeExpression->type = nodeExpressionEquation;
             return nodeExpression;
         }
@@ -124,26 +141,33 @@ public:
 
 
     std::optional<node::Statement *> parseStatement() {
-        if (checkTokenType(TokenType::_exit) && checkTokenType(TokenType::_paren_open, 1)) {
+        if (checkTokenType(TokenType::_exit) && checkTokenType(TokenType::_paren_open, 1))
+        {
             consumeMultiple(2);
             auto *statementExit = m_arena.allocate<node::StatementExit>();
-            if (auto nodeExpression = parseExpression()) {
+            if (auto nodeExpression = parseExpression())
+            {
                 statementExit->expression = nodeExpression.value();
-            } else {
+            } else
+            {
                 printErrorMessage("Expected expression in return", "parseStatement, exit checking");
                 exit(EXIT_FAILURE);
             }
 
-            if (checkTokenType(TokenType::_paren_close)) {
+            if (checkTokenType(TokenType::_paren_close))
+            {
                 consume();
-            } else {
+            } else
+            {
                 printErrorMessage("Missing parenthesis ) in return", "parseStatement, exit checking");
                 exit(EXIT_FAILURE);
             }
 
-            if (checkTokenType(TokenType::_semi)) {
+            if (checkTokenType(TokenType::_semi))
+            {
                 consume();
-            } else {
+            } else
+            {
                 printErrorMessage("Expected semicolon in return", "parseStatement, exit checking");
                 exit(EXIT_FAILURE);
             }
@@ -152,21 +176,26 @@ public:
             return nodeStatement;
         }
         if (checkTokenType(TokenType::_let) && checkTokenType(TokenType::_identifier, 1) && checkTokenType(
-                TokenType::_equals, 2)) {
+                TokenType::_equals, 2))
+        {
             consume(); // Consume 'let'
             auto statementLet = m_arena.allocate<node::StatementLet>();
             statementLet->identifier = consume(); // consume variable name
             consume(); // Consume '='
-            if (auto expr = parseExpression()) {
+            if (auto expr = parseExpression())
+            {
                 statementLet->expression = expr.value();
-            } else {
+            } else
+            {
                 printErrorMessage("Invalid expression in let", "parseStatement, let checking");
                 exit(EXIT_FAILURE);
             }
 
-            if (checkTokenType(TokenType::_semi)) {
+            if (checkTokenType(TokenType::_semi))
+            {
                 consume();
-            } else {
+            } else
+            {
                 printErrorMessage("Expected semi in let", "parseStatement, exit checking");
                 exit(EXIT_FAILURE);
             }
@@ -175,27 +204,33 @@ public:
             nodeStatement->type = statementLet;
             return nodeStatement;
         }
-        if (checkTokenType(TokenType::_print) && checkTokenType(TokenType::_paren_open, 1)) {
+        if (checkTokenType(TokenType::_print) && checkTokenType(TokenType::_paren_open, 1))
+        {
             consume(); // Consume 'print'
             consume(); // Consume 'paren'
             auto statementPrint = m_arena.allocate<node::StatementPrint>();
-            if (auto expr = parseExpression()) {
+            if (auto expr = parseExpression())
+            {
                 statementPrint->expression = expr.value();
-            } else {
+            } else
+            {
                 printErrorMessage("Invalid expression in print", "parseStatement, printing");
                 exit(EXIT_FAILURE);
             }
-            if (checkTokenType(TokenType::_paren_close)) {
+            if (checkTokenType(TokenType::_paren_close))
+            {
                 consume();
-
-            } else {
+            } else
+            {
                 printErrorMessage("No closed parens in print", "parseStatement, printing");
                 exit(EXIT_FAILURE);
             }
 
-            if (checkTokenType(TokenType::_semi)) {
+            if (checkTokenType(TokenType::_semi))
+            {
                 consume();
-            } else {
+            } else
+            {
                 printErrorMessage("Expected semi in print", "parseStatement, printing");
                 exit(EXIT_FAILURE);
             }
@@ -212,10 +247,13 @@ public:
         auto programNode = m_arena.allocate<node::Program>();
 
 
-        while (peek().has_value()) {
-            if (auto stmt = parseStatement()) {
+        while (peek().has_value())
+        {
+            if (auto stmt = parseStatement())
+            {
                 programNode->statements.push_back(stmt.value());
-            } else {
+            } else
+            {
                 consume();
             }
         }
@@ -225,34 +263,50 @@ public:
 
 private:
     const std::vector<Token> m_tokens{};
-    std::vector<node::Term> operatorStack{};
+    std::vector<Token> m_equation{};
     ArenaAllocator m_arena;
     size_t m_currentIndex = 0;
 
-    void pushOperatorStack(const node::Term &term) {
-        operatorStack.push_back(term);
-    }
+    std::vector<Token> shuntingYard() {
+        std::vector<Token> output = {};
+        std::vector<Token> operatorStack = {};
 
-    void popOperatorStack() {
-    }
-
-    void resetOperatorStack() {
-        operatorStack.clear();
-    }
-
-    std::optional<node::Term *> handleEquationTerms(node::Term *term) {
-        if (operatorStack.empty()) {
-            pushOperatorStack(*term); // Push a copy of *term onto the stack
-            return {}; // Return an empty optional if operatorStack was empty
+        for (auto &equationTerm: m_equation)
+        {
+            if (equationTerm.type == TokenType::_int_lit)
+            {
+                output.push_back(equationTerm); // Always push numbers
+            } else
+            {
+                if (operatorStack.empty())
+                {
+                    operatorStack.push_back(equationTerm); // If stack empty , always push op
+                } else
+                {
+                    while (operatorStack.back().precedence >= equationTerm.precedence)
+                    {
+                        // Check precedences in the operator stack
+                        output.push_back(operatorStack.back());
+                        operatorStack.pop_back();
+                    }
+                    operatorStack.push_back(equationTerm);
+                }
+            }
         }
-
-        return term; // Return the same term pointer if operatorStack was not empty
+        for (int i = static_cast<int>(operatorStack.size()) - 1; i >= 0; --i)
+        {
+            output.push_back(operatorStack.at(i));
+        }
+        m_equation.clear();
+        return output;
     }
 
     [[nodiscard]] std::optional<Token> peek(int const amount = 0) const {
-        if (m_currentIndex + amount >= m_tokens.size()) {
+        if (m_currentIndex + amount >= m_tokens.size())
+        {
             return {};
-        } else {
+        } else
+        {
             return m_tokens.at(m_currentIndex + amount);
         }
     }
@@ -265,7 +319,8 @@ private:
     std::vector<Token> consumeMultiple(int const amount) {
         std::vector<Token> consumedTokens;
 
-        for (size_t i = 1; i <= amount; i++) {
+        for (size_t i = 1; i <= amount; i++)
+        {
             consumedTokens.push_back(consume());
         }
 
