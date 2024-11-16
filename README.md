@@ -1,6 +1,6 @@
 # Lang
 
-x86_64 Linux-specific compiler for my croatian language based programming language.
+x86_64 single platform compiler for linux. The programming language is based on croatian language.
 
 ## Prerequisites
 
