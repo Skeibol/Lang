@@ -30,7 +30,7 @@ void test() {
     DIR *dp = nullptr;
     std::vector<std::string> foundTestFiles{};
 
-    dp = opendir("./testing/");
+    dp = opendir("./tests/");
     if (dp != nullptr)
     {
         dirent *entry = nullptr;
@@ -46,7 +46,7 @@ void test() {
 
             std::cout << "found test file -> " << dNameString << '\n';
 
-            foundTestFiles.push_back("./testing/" + dNameString);
+            foundTestFiles.push_back("./tests/" + dNameString);
         }
     }
     std::cout << "\n======== " << foundTestFiles.size() << " tests found ========" << '\n';
@@ -58,10 +58,10 @@ void test() {
         std::string fileContents = readFileContents(foundTestFiles[i]);
         std::string programName = foundTestFiles[i].erase(foundTestFiles[i].length() - 4);
         std::cout << "Try compile program -> " << programName << '\n';
-        programName = programName.erase(0, 10);
+        programName = programName.erase(0, 8);
         auto outputName = programName;
         outputName.erase(outputName.length() - 5);
-        std::fstream file("./testing/testAsm/" + programName + ".asm", std::ios::out);
+        std::fstream file("./tests/testAsm/" + programName + ".asm", std::ios::out);
 
         auto *tokenizer = new Tokenizer(std::move(fileContents));
 
@@ -82,8 +82,8 @@ void test() {
 
         ld -o ./test/code ./test/testAsm/code.test.o
          */
-        nasmStr.push_back("nasm -felf64 ./testing/testAsm/" + programName + ".asm");
-        linkerStr.push_back("ld -o ./testing/" + outputName + " ./testing/testAsm/" + programName + ".o");
+        nasmStr.push_back("nasm -felf64 ./tests/testAsm/" + programName + ".asm");
+        linkerStr.push_back("ld -o ./tests/" + outputName + " ./tests/testAsm/" + programName + ".o");
         //std::cout << generator << " <- gen address " << parser << " <- parser address " << tokenizer << " <- tokenizer address\n";
         std::cout << "Compiled program -> " << programName << '\n';
     }
@@ -107,8 +107,8 @@ void test() {
 int main(int argc, char const *argv[]) {
     if (argc != 2)
     {
-        std::string const testFolder = "./testing/";
-        std::cerr << "No input given, testing mode" << "\n";
+        std::string const testFolder = "./tests/";
+        std::cerr << "No input given, tests mode" << "\n";
         test();
         return EXIT_FAILURE;
     }

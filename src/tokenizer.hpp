@@ -32,6 +32,7 @@ public:
     std::vector<Token> tokenize();
 
 private:
+    bool isComment = false;
     const std::string m_source;
     size_t m_currentIndex = 0;
 
