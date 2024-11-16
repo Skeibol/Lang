@@ -26,7 +26,7 @@ The console application will exit with the return code 0 , exit statement is izl
 
 ## Sample code
 
-Run without arguements to run testing 
+This is simple example of a syntax in .cro files
 
 ```code
 neka a bude 30;
