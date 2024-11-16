@@ -31,17 +31,22 @@ std::vector<Token> Tokenizer::tokenize()
                 buffer.push_back(consume());
             } while (peek().has_value() && std::isalnum(peek().value()));
 
-            if (buffer == "return")
+            if (buffer == "izlaz")
             {
                 tokens.push_back({TokenType::_exit});
                 buffer.clear();
             }
-            else if (buffer == "let")
+            else if (buffer == "neka")
             {
                 tokens.push_back({TokenType::_let});
                 buffer.clear();
             }
-            else if (buffer == "print")
+            else if (buffer == "bude")
+            {
+                tokens.push_back({TokenType::_equals});
+                buffer.clear();
+            }
+            else if (buffer == "izbaci")
             {
                 tokens.push_back({TokenType::_print});
                 buffer.clear();
@@ -108,11 +113,7 @@ std::vector<Token> Tokenizer::tokenize()
             consume();
             tokens.push_back({TokenType::_semi});
         }
-        else if (peek().value() == '=')
-        {
-            consume();
-            tokens.push_back({TokenType::_equals});
-        }
+
         else if (std::isspace(peek().value()))
         {
             consume();
