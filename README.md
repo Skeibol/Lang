@@ -24,6 +24,18 @@ foo@bar:~$ ./build/out
 
 The console application will exit with the return code 0 , exit statement is izlaz(0)
 
+## Sample code
+
+Run without arguements to run testing 
+
+```code
+neka a bude 30;
+neka b bude 40;
+
+izbaci(a+b); // Isprintaj a + b. Ovo je komentar
+izlaz(0);
+```
+
 ## Running the tests
 
 Run without arguements to run testing 
