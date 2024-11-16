@@ -27,6 +27,41 @@ public:
                     gen->m_output << "    add rax,rbx\n";
                     gen->push("rax");
                 }
+                if (term_operand->op.value.value() == "*")
+                {
+                    gen->pop("rax");
+                    gen->pop("rbx");
+                    gen->m_output << "    mul rbx\n";
+                    gen->push("rax");
+                }
+                 if (term_operand->op.value.value() == "-")
+                {
+                    gen->pop("rax");//3
+                    gen->pop("rbx");//14
+                    gen->m_output << "    sub rbx,rax\n";
+                    gen->push("rbx");
+                }
+                   if (term_operand->op.value.value() == "/")
+                {
+                    gen->m_generatedDivisions++;
+                    gen->pop("rax");//6
+                    gen->pop("rbx");//20
+                    gen->m_output << "    xor rcx,rcx\n";
+                    gen->m_output << "    xor r8,r8\n";
+                    gen->m_output << ".div" << std::to_string(gen->m_generatedDivisions) << ":\n";
+                    gen->m_output << "    sub rbx,rax\n";     //rbx 14
+                    gen->m_output << "    mov rcx,rbx\n";        //rcx 20  
+                    gen->m_output << "    test rbx, rbx \n"; //2 2
+                    //gen->m_output << "    cmp rcx,0\n";
+                    gen->m_output << "    js .divb" << std::to_string(gen->m_generatedDivisions) << "\n";
+                    gen->m_output << "    inc r8\n";
+                    gen->m_output << "    cmp rbx,0\n";
+                    gen->m_output << "    jne .div" << std::to_string(gen->m_generatedDivisions) << "\n";
+                    gen->m_output << ".divb" << std::to_string(gen->m_generatedDivisions) << ":\n";
+                    gen->push("r8");
+                    
+
+                }
             }
 
             void operator()(const node::TermIdentifier *term_identifier) const {
@@ -90,6 +125,7 @@ public:
 
             void operator()(const node::StatementPrint *stmt_print) const {
                 gen->m_output << "    ;; Print statement start\n"; // TODO cmp rdx, rax
+
                 gen->generateExpression(stmt_print->expression);
                 gen->pop("rdi");
                 gen->m_output << "    call dump\n";
@@ -187,5 +223,6 @@ private:
     std::stringstream m_output;
 
     size_t m_stackPointerOffset = 0;
+    size_t m_generatedDivisions = 0;
     std::unordered_map<std::string, Variable> m_variables{};
 };

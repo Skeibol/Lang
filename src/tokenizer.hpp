@@ -15,6 +15,8 @@ enum class TokenType {
     _equals,
     _plus,
     _multiply,
+    _subtract,
+    _divide
 };
 
 struct Token {

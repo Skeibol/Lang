@@ -56,7 +56,18 @@ std::vector<Token> Tokenizer::tokenize() {
         } else if (peek().value() == '*')
         {
             buffer.push_back(consume());
-            tokens.push_back({TokenType::_multiply, buffer, 3});
+            tokens.push_back({TokenType::_multiply, buffer, 4});
+            buffer.clear();
+        } else if (peek().value() == '-')
+        {
+            buffer.push_back(consume());
+            tokens.push_back({TokenType::_subtract, buffer, 3});
+            buffer.clear();
+        }
+        else if (peek().value() == '/')
+        {
+            buffer.push_back(consume());
+            tokens.push_back({TokenType::_divide, buffer, 5});
             buffer.clear();
         } else if (peek().value() == '+')
         {

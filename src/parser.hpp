@@ -79,7 +79,7 @@ public:
             term->type = termIdentifier;
             return term;
         }
-        if (termToParse.type == TokenType::_plus || termToParse.type == TokenType::_multiply)
+        if (termToParse.type == TokenType::_plus || termToParse.type == TokenType::_multiply || termToParse.type == TokenType::_divide || termToParse.type == TokenType::_subtract)
         {
             auto *termOperand = m_arena.allocate<node::TermOperand>();
             termOperand->op = termToParse;
@@ -87,6 +87,7 @@ public:
             term->type = termOperand;
             return term;
         }
+        
 
         return {};
     }
@@ -100,7 +101,7 @@ public:
                 // FIRST CREATE EQUATION
                 m_equation.push_back(consume());
 
-                if (checkTokenType(TokenType::_plus) || checkTokenType(TokenType::_multiply))
+                if (checkTokenType(TokenType::_plus) || checkTokenType(TokenType::_multiply) || checkTokenType(TokenType::_divide) || checkTokenType(TokenType::_subtract) )
                 {
                     m_equation.push_back(consume());
 

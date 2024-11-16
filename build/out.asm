@@ -49,37 +49,201 @@ dump:
     ret
 global _start
 _start:
-    mov rax, 20
+    mov rax, 40
     push rax
     mov rax, 30
     push rax
     ;; Print statement start
-    mov rax, 2
+    mov rax, 25
     push rax
-    push QWORD [rsp + 8]
-    push QWORD [rsp + 24]
-    mov rax, 2
+    mov rax, 6
     push rax
+    pop rax
+    pop rbx
+    xor rcx,rcx
+    xor r8,r8
+.div1:
+    sub rbx,rax
+    mov rcx,rbx
+    test rbx, rbx 
+    js .divb1
+    inc r8
+    cmp rbx,0
+    jne .div1
+.divb1:
+    push r8
+    mov rax, 5
+    push rax
+    mov rax, 6
+    push rax
+    pop rax
+    pop rbx
+    xor rcx,rcx
+    xor r8,r8
+.div2:
+    sub rbx,rax
+    mov rcx,rbx
+    test rbx, rbx 
+    js .divb2
+    inc r8
+    cmp rbx,0
+    jne .div2
+.divb2:
+    push r8
     pop rax
     pop rbx
     add rax,rbx
     push rax
-    mov rax, 3
+    mov rax, 10
     push rax
-    push QWORD [rsp + 32]
+    mov rax, 9
+    push rax
+    pop rax
+    pop rbx
+    xor rcx,rcx
+    xor r8,r8
+.div3:
+    sub rbx,rax
+    mov rcx,rbx
+    test rbx, rbx 
+    js .divb3
+    inc r8
+    cmp rbx,0
+    jne .div3
+.divb3:
+    push r8
+    pop rax
+    pop rbx
+    add rax,rbx
+    push rax
+    mov rax, 25
+    push rax
+    mov rax, 6
+    push rax
+    pop rax
+    pop rbx
+    xor rcx,rcx
+    xor r8,r8
+.div4:
+    sub rbx,rax
+    mov rcx,rbx
+    test rbx, rbx 
+    js .divb4
+    inc r8
+    cmp rbx,0
+    jne .div4
+.divb4:
+    push r8
     pop rax
     pop rbx
     add rax,rbx
     push rax
     mov rax, 5
     push rax
+    mov rax, 6
+    push rax
+    pop rax
+    pop rbx
+    xor rcx,rcx
+    xor r8,r8
+.div5:
+    sub rbx,rax
+    mov rcx,rbx
+    test rbx, rbx 
+    js .divb5
+    inc r8
+    cmp rbx,0
+    jne .div5
+.divb5:
+    push r8
     pop rax
     pop rbx
     add rax,rbx
     push rax
-    push QWORD [rsp + 40]
-    mov rax, 3
+    mov rax, 10
     push rax
+    mov rax, 9
+    push rax
+    pop rax
+    pop rbx
+    xor rcx,rcx
+    xor r8,r8
+.div6:
+    sub rbx,rax
+    mov rcx,rbx
+    test rbx, rbx 
+    js .divb6
+    inc r8
+    cmp rbx,0
+    jne .div6
+.divb6:
+    push r8
+    pop rax
+    pop rbx
+    add rax,rbx
+    push rax
+    mov rax, 25
+    push rax
+    mov rax, 6
+    push rax
+    pop rax
+    pop rbx
+    xor rcx,rcx
+    xor r8,r8
+.div7:
+    sub rbx,rax
+    mov rcx,rbx
+    test rbx, rbx 
+    js .divb7
+    inc r8
+    cmp rbx,0
+    jne .div7
+.divb7:
+    push r8
+    pop rax
+    pop rbx
+    add rax,rbx
+    push rax
+    mov rax, 5
+    push rax
+    mov rax, 6
+    push rax
+    pop rax
+    pop rbx
+    xor rcx,rcx
+    xor r8,r8
+.div8:
+    sub rbx,rax
+    mov rcx,rbx
+    test rbx, rbx 
+    js .divb8
+    inc r8
+    cmp rbx,0
+    jne .div8
+.divb8:
+    push r8
+    pop rax
+    pop rbx
+    add rax,rbx
+    push rax
+    mov rax, 10
+    push rax
+    mov rax, 9
+    push rax
+    pop rax
+    pop rbx
+    xor rcx,rcx
+    xor r8,r8
+.div9:
+    sub rbx,rax
+    mov rcx,rbx
+    test rbx, rbx 
+    js .divb9
+    inc r8
+    cmp rbx,0
+    jne .div9
+.divb9:
+    push r8
     pop rax
     pop rbx
     add rax,rbx
