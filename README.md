@@ -1,6 +1,6 @@
 # Lang
 
-x86_64 single platform compiler for linux. The programming language is based on croatian language.
+x86_64 single platform compiler for linux, code is compiled directly to assembly code which is then assembled and linked to produce an executable file. The programming language is based on croatian language.
 
 ## Prerequisites
 
