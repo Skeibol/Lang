@@ -31,8 +31,9 @@ This is simple example of a syntax in .cro files
 ```code
 neka a bude 30;
 neka b bude 40;
+neka c bude a*b;
 
-izbaci(a+b); // Isprintaj a + b. Ovo je komentar
+izbaci(c+c); // Isprintaj a + b. Ovo je komentar
 izlaz(0);
 ```
 
