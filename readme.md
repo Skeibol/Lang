@@ -18,7 +18,7 @@ Requirements for the software and other tools to build, test and push
 
 Compile sample code code.cro provided in the project
 
-```{r, engine='bash', count_lines}
+```shellscript
 foo@bar:~$ ./lang ./code.cro
 ./lang ./code.cro -------- Program starts here ---------
 ```
