@@ -1,20 +1,20 @@
-all: crust crust.o run
+all: lang lang.o run
 
-build: crust crust.o
+build: lang lang.o
 
-run: ./crust
-	./crust ./code.cro # -------- Program starts here --------
+run: ./lang
+	./lang ./code.cro # -------- Program starts here --------
 	
-crust: ./src/main.cpp ./src/tokenizer.hpp ./src/parser.hpp ./src/generator.hpp ./src/tokenizer.cpp
-	g++ -fdiagnostics-color=always -g ./src/*.cpp -o ./crust
+lang: ./src/main.cpp ./src/tokenizer.hpp ./src/parser.hpp ./src/generator.hpp ./src/tokenizer.cpp
+	g++ -fdiagnostics-color=always -g ./src/*.cpp -o ./lang
 
-crust.o: ./src/main.cpp ./src/tokenizer.hpp ./src/parser.hpp ./src/generator.hpp ./src/tokenizer.cpp
-	g++ ./src/*.cpp -o ./crust.o
+lang.o: ./src/main.cpp ./src/tokenizer.hpp ./src/parser.hpp ./src/generator.hpp ./src/tokenizer.cpp
+	g++ ./src/*.cpp -o ./lang.o
 
 
 
 clean:
-	rm -f ./crust ./crust.o # Removed files ./crust.o , ./crust
+	rm -f ./lang ./lang.o # Removed files ./lang.o , ./lang
 
 blabla:
 	echo 2
